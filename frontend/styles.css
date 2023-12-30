@@ -1,0 +1,64 @@
+body {
+  margin: 10px;
+  background-color: #F7EEED;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+h1 {
+  padding: 10px;
+}
+
+.charts {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.chart {
+  font-family: 'Courier New', Courier, monospace;
+  border: 1px solid #ccc;
+  padding: 10px;
+  height: fit-content;
+  margin: 10px;
+  background-color: #fff;
+}
+
+.stacked-bar-chart {
+  width: 700px;
+}
+
+#bubble-chart circle {
+  stroke-width: 1px;
+  stroke: black;
+}
+
+/* .chart rect {
+  stroke:  #fff;
+} */
+  
+.chart-container {
+  position: relative;
+}
+
+.chart-container rect:hover {
+  opacity: 0.7;
+}
+  
+.chart .axis path,
+.chart .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+  
+.chart text {
+  font-weight: bold;
+  color: #303A52;
+}
+  
+.chart .axis .tick line {
+  stroke-dasharray: 2, 2;
+  margin: 5px;
+}
+  
