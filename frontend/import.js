@@ -17,8 +17,8 @@ d3.json('http://135.181.84.87:8181/customers?page=1&size=10000')
 //1. Bubble-chart Power-Price
 // Define the SVG dimensions
 const margin = { top: 30, right: 110, bottom: 40, left: 50 };
-const width = 650 - margin.left - margin.right;
-const height = 400 - margin.top - margin.bottom;
+const width = 620 - margin.left - margin.right;
+const height = 350 - margin.top - margin.bottom;
 
 // Append an SVG element to the body
 const svg = d3.select("#bubble-chart")
@@ -175,7 +175,7 @@ const brandCounts = resultData.reduce((accumulator,entry) => {
 // Define SVG dimensions and margins
     const stackedBarMargin = { top: 30, right: 30, bottom: 30, left: 50 };
     const stackedBarWidth = 1410 - stackedBarMargin.left - stackedBarMargin.right;
-    const stackedBarHeight = 450 - stackedBarMargin.top - stackedBarMargin.bottom;
+    const stackedBarHeight = 350 - stackedBarMargin.top - stackedBarMargin.bottom;
 
     // Append SVG to chart-container
     const svg2 = d3.select("#chart-container")
@@ -289,8 +289,8 @@ console.log(scatterData)
 const filteredData = scatterData.filter(d => d.car.co2_emissions !== null && d.car.energy_cost !== null);
 console.log(filteredData);
 const scatterMargin = { top: 30, right: 20, bottom: 40, left: 50 };
-const scatterWidth = 680 - scatterMargin.left - scatterMargin.right;
-const scatterHeight = 400 - scatterMargin.top - scatterMargin.bottom;
+const scatterWidth = 570 - scatterMargin.left - scatterMargin.right;
+const scatterHeight = 350 - scatterMargin.top - scatterMargin.bottom;
 
 // List of unique brand-name pairs with co2_emissions and energy_cost
 const brandData = resultData.map(d => ({
@@ -421,18 +421,6 @@ const brandData = resultData.map(d => ({
         scatterTooltip.transition().style('opacity', 0);
         });
 
-    // // Add a layer of labels.
-    // svg3.append("g")
-    // .attr("font-family", "sans-serif")
-    // .attr("font-size", 10)
-    // .selectAll("text")
-    // .data(filteredData)
-    // .join("text")
-    // .attr("dy", "0.35em")
-    // .attr("x", d => xScatter(d.car.co2_emissions) + 7)
-    // .attr("y", d => yScatter(d.car.energy_cost))
-    // .text(d => d.car.brand + " " + d.car.name);
-
     //Zooming a scatter plot
     const zoom = d3.zoom()
     .scaleExtent([1, 40])
@@ -452,6 +440,138 @@ const brandData = resultData.map(d => ({
     svg3.selectAll(".x-axis").call(d3.axisBottom(zx));
     svg3.selectAll(".y-axis").call(d3.axisLeft(zy));
     }
+
+    const defs = svg3.append("defs");
+
+    // Male filter field
+    const maleFilter = defs.append("filter")
+        .attr("id", "maleFilter")
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("width", scatterWidth)
+        .attr("height", scatterHeight);
+
+    maleFilter.append("feColorMatrix")
+        .attr("type", "matrix")
+        .attr("values", "1 0 0 0 0 0 0.3 0 0 0 0 0 1 0 0 0 0 0 0.3 0");
+
+    // Female filter field
+    const femaleFilter = defs.append("filter")
+        .attr("id", "femaleFilter")
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("width", scatterWidth)
+        .attr("height", scatterHeight);
+
+    femaleFilter.append("feColorMatrix")
+        .attr("type", "matrix")
+        .attr("values", "0.3 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0");
+
+    // Create checkboxes
+const maleCheckbox = d3.select("#male-checkbox");
+const femaleCheckbox = d3.select("#female-checkbox");
+
+    // Function to update the scatter plot
+    function updateScatterPlot() {
+        const isMaleChecked = maleCheckbox.property("checked");
+        const isFemaleChecked = femaleCheckbox.property("checked");
+
+        svg3.selectAll("circle")
+            .attr("filter", null); // Filter is removed by default
+
+        if (isMaleChecked && !isFemaleChecked) {
+            svg3.selectAll("circle")
+                .filter(d => d.gender === "M")
+                .attr("filter", "url(#maleFilter)");
+
+        } else if (isFemaleChecked && !isMaleChecked) {
+            svg3.selectAll("circle")
+                .filter(d => d.gender === "F")
+                .attr("filter", "url(#femaleFilter)");
+                
+        } else if (isMaleChecked && isFemaleChecked) {
+          // If both checkboxes are checked, show all circles
+          svg3.selectAll("circle")
+              .style("display", "block");
+        } else {
+          // If both checkboxes are unchecked, show all circles
+          svg3.selectAll("circle")
+              .style("display", "none");
+      }
+    }
+
+    // Update scatter plot when checkboxes are changed
+    maleCheckbox.on("change", updateScatterPlot);
+    femaleCheckbox.on("change", updateScatterPlot);
+
+    // show unique values of marital_status in the console 
+    const uniqueMaritalStatus = [...new Set(resultData.map(d => d.marital_status))];
+    console.log(uniqueMaritalStatus);
+
+        // Get the container to which you want to add checkboxes
+        const checkboxContainer = document.getElementById('checkbox-container');
+
+        // Function to update filtration based on selected marital statuses
+        function updateMaritalStatusFilter() {
+          const selectedMaritalStatuses = [];
+
+        // Iterate through marital status checkboxes to get selected statuses
+        document.querySelectorAll('.marital-status-checkbox input[type="checkbox"]').forEach(checkbox => {
+            if (checkbox.checked) {
+                selectedMaritalStatuses.push(checkbox.id.replace('-checkbox', ''));
+            }
+        });
+
+        // Filter based on selected marital statuses
+        if (selectedMaritalStatuses.length > 0) {
+            svg3.selectAll("circle")
+                .style("display", d => selectedMaritalStatuses.includes(d.marital_status) ? "block" : "none");
+        } else {
+            // Show all circles if no marital status checkbox is selected
+            svg3.selectAll("circle")
+                .style("display", "block");
+        }
+      }
+
+      // Attach change event listeners to marital status checkboxes
+      document.querySelectorAll('.marital-status-checkbox input[type="checkbox"]').forEach(checkbox => {
+        checkbox.addEventListener('change', updateMaritalStatusFilter);
+      });
+
+
+        /// Iterate through unique statuses and create checkboxes
+        uniqueMaritalStatus.forEach(status => {
+
+          // Create div for checkbox and label
+          const div = document.createElement('div');
+          div.className = 'marital-status-checkbox';
+    
+          // Create checkbox
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.id = status.toLowerCase() + '-checkbox'; // Assign unique IDs if needed
+          checkbox.checked = true; // Check all checkboxes by default
+    
+          // Create label
+          const label = document.createElement('label');
+          label.htmlFor = checkbox.id;
+          label.textContent = status;
+
+          // Append checkbox and label to the div
+          div.appendChild(checkbox);
+          div.appendChild(label);
+
+          // Append div to the container
+          checkboxContainer.appendChild(div);
+        });
+    
+        // Initial update
+        updateScatterPlot();
+        updateMaritalStatusFilter();
+
+
+
+
 
 
 
