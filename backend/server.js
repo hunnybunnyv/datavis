@@ -4,7 +4,6 @@ const { Client } = require('pg');
 const app = express();
 const port = 3000;
 
-// Replace the connection string with your own
 const connectionString = 'postgres://postgres:AglaeSebastien@135.181.84.87:5432/mbds_bigdata?sslmode=disable';
 
 const client = new Client({
