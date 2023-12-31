@@ -1,25 +1,28 @@
 const express = require('express');
 const { Client } = require('pg');
+const cors = require('cors');
 
 const app = express();
 const port = 3000;
 
-const connectionString = 'postgres://postgres:AglaeSebastien@135.181.84.87:5432/mbds_bigdata?sslmode=disable';
+// Enable CORS for all routes
+app.use(cors());
 
-const client = new Client({
-  connectionString: connectionString,
-});
-
+// Your route handling code
 app.get('/api/customers', async (req, res) => {
-  try {
-    // Connect to the PostgreSQL database
-    await client.connect();
+  // Replace the connection string with your own
+  const connectionString = 'postgres://postgres:AglaeSebastien@135.181.84.87:5432/mbds_bigdata?sslmode=disable';
 
+  const client = new Client({
+    connectionString: connectionString,
+  });
+
+  try {
+    await client.connect();
     console.log('Connected to the database');
 
-    // Execute a simple query
-    const result = await client.query('SELECT * FROM customer');
-
+    // Example: Execute a simple query
+    const result = await client.query('SELECT * FROM catalog_car');
     console.log('Query result:', result.rows);
 
     res.json(result.rows);
